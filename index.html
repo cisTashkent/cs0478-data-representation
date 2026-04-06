@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Representation — IGCSE CS 0478</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ RESET & VARIABLES ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0f172a;
+  --deep:    #1e293b;
+  --panel:   #162032;
+  --blue:    #38bdf8;
+  --cyan:    #22d3ee;
+  --green:   #4ade80;
+  --amber:   #fbbf24;
+  --rose:    #fb7185;
+  --purple:  #a78bfa;
+  --slate:   #64748b;
+  --muted:   #94a3b8;
+  --border:  rgba(56,189,248,0.18);
+  --glass:   rgba(255,255,255,0.04);
+  --glow:    0 0 40px rgba(56,189,248,0.12);
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --font-head: 'Syne', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy);
+  color: #e2e8f0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* grid bg */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* ═══ LAYOUT ═══════════════════════════════════════════════════════════════ */
+.container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* ═══ HERO ══════════════════════════════════════════════════════════════════ */
+.hero {
+  padding: 64px 0 40px;
+  text-align: center;
+  position: relative;
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(56,189,248,0.1);
+  border: 1px solid var(--border);
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #fff 0%, var(--blue) 50%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.hero-sub {
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 520px;
+  margin: 0 auto 40px;
+}
+
+/* ═══ STUDENT INFO CARD ════════════════════════════════════════════════════ */
+.student-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 40px;
+  box-shadow: var(--glow);
+  animation: fadeUp 0.5s ease both;
+}
+.student-card h2 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 20px;
+}
+.student-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width:600px){ .student-grid { grid-template-columns:1fr; } }
+
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-group label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.field-group input, .field-group select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-group input:focus, .field-group select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+}
+.field-group select option { background: var(--deep); }
+
+/* ═══ NAV TABS ══════════════════════════════════════════════════════════════ */
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 32px;
+}
+.tab-btn {
+  flex: 1;
+  min-width: 80px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  text-align: center;
+}
+.tab-btn:hover { color: #fff; background: var(--glass); }
+.tab-btn.active {
+  background: var(--blue);
+  color: var(--navy);
+}
+
+/* ═══ SECTIONS ══════════════════════════════════════════════════════════════ */
+.section { display: none; animation: fadeUp 0.3s ease both; }
+.section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ CONTENT BLOCKS ════════════════════════════════════════════════════════ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.section-num {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+.section-title { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; color: #fff; }
+.section-desc { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* ═══ THEORY BOX ════════════════════════════════════════════════════════════ */
+.theory-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blue);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+.theory-box.green  { border-left-color: var(--green);  }
+.theory-box.amber  { border-left-color: var(--amber);  }
+.theory-box.purple { border-left-color: var(--purple); }
+.theory-box.rose   { border-left-color: var(--rose);   }
+.theory-box h3 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.theory-box.green  h3 { color: var(--green); }
+.theory-box.amber  h3 { color: var(--amber); }
+.theory-box.purple h3 { color: var(--purple);}
+.theory-box.rose   h3 { color: var(--rose);  }
+.theory-box h3 { color: var(--blue); }
+.theory-box p, .theory-box li { color: #cbd5e1; font-size: 14px; margin-bottom: 8px; }
+.theory-box ul { padding-left: 20px; }
+.theory-box .highlight {
+  font-family: var(--font-mono);
+  background: rgba(56,189,248,0.1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--blue);
+  margin-top: 10px;
+  word-break: break-all;
+}
+.theory-box.green  .highlight { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.2); color: var(--green); }
+.theory-box.amber  .highlight { background: rgba(251,191,36,0.1);  border-color: rgba(251,191,36,0.2);  color: var(--amber); }
+.theory-box.purple .highlight { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.2); color: var(--purple); }
+.theory-box.rose   .highlight { background: rgba(251,113,133,0.1); border-color: rgba(251,113,133,0.2); color: var(--rose); }
+
+/* ═══ TABLES ════════════════════════════════════════════════════════════════ */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin-bottom: 24px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.data-table th {
+  background: linear-gradient(135deg, #1a3a5c, #162032);
+  color: var(--blue);
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(56,189,248,0.06);
+  color: #e2e8f0;
+}
+.data-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .given { color: var(--cyan); font-weight: 600; }
+.data-table .example { color: var(--amber); }
+
+/* ═══ TASK BLOCKS ════════════════════════════════════════════════════════════ */
+.task-block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+.level-1 { background: rgba(74,222,128,0.15);  color: var(--green);  border: 1px solid rgba(74,222,128,0.3);  }
+.level-2 { background: rgba(251,191,36,0.15);   color: var(--amber);  border: 1px solid rgba(251,191,36,0.3);  }
+.level-3 { background: rgba(251,113,133,0.15);  color: var(--rose);   border: 1px solid rgba(251,113,133,0.3); }
+.level-4 { background: rgba(167,139,250,0.15);  color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+
+.task-block h4 {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.task-block p { color: #94a3b8; font-size: 14px; margin-bottom: 16px; }
+
+/* ═══ ANSWER INPUTS ═════════════════════════════════════════════════════════ */
+.answer-field {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  min-height: 44px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  margin-bottom: 12px;
+}
+.answer-field:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
+}
+.answer-field::placeholder { color: var(--slate); }
+
+.answer-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ═══ SEQUENCE INPUT ════════════════════════════════════════════════════════ */
+.seq-container { overflow-x: auto; margin-bottom: 16px; }
+.seq-grid {
+  display: grid;
+  gap: 4px;
+  min-width: 600px;
+}
+.seq-row { display: flex; gap: 4px; }
+.seq-cell {
+  width: 72px; height: 44px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.seq-cell.given {
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: var(--blue);
+}
+.seq-cell input {
+  width: 68px; height: 40px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 7px;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+.seq-cell input:focus {
+  border-color: var(--cyan);
+  background: rgba(34,211,238,0.08);
+  box-shadow: 0 0 0 2px rgba(34,211,238,0.12);
+}
+
+/* ═══ CONVERSION TABLE INPUT ════════════════════════════════════════════════ */
+.conv-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; border-radius: 10px; overflow: hidden; }
+.conv-table th {
+  background: rgba(56,189,248,0.12);
+  color: var(--blue);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border: 1px solid var(--border);
+}
+.conv-table td {
+  border: 1px solid rgba(56,189,248,0.08);
+  padding: 6px;
+  vertical-align: middle;
+}
+.conv-table .given-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--cyan);
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+}
+.conv-table input {
+  width: 100%; height: 38px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+  padding: 4px 8px;
+}
+.conv-table input:focus {
+  border-color: var(--blue);
+  background: rgba(56,189,248,0.06);
+}
+
+/* ═══ BINARY GRID ═══════════════════════════════════════════════════════════ */
+.bit-grid {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.bit-header, .bit-cell {
+  width: 48px; height: 40px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.bit-header { background: rgba(56,189,248,0.1); color: var(--blue); border: 1px solid var(--border); }
+.bit-header.neg { background: rgba(251,113,133,0.1); color: var(--rose); border-color: rgba(251,113,133,0.2); }
+.bit-cell input {
+  width: 44px; height: 36px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+.bit-cell input:focus { border-color: var(--cyan); background: rgba(34,211,238,0.08); }
+
+/* ═══ SUBMIT AREA ═══════════════════════════════════════════════════════════ */
+.submit-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 40px 0;
+  text-align: center;
+  box-shadow: var(--glow);
+}
+.submit-section h2 {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.submit-section p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.btn-submit {
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  color: var(--navy);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 40px;
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(56,189,248,0.35); }
+.btn-submit.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: #fff;
+}
+.btn-submit.secondary:hover { background: var(--glass); box-shadow: none; }
+
+/* ═══ PROGRESS BAR ══════════════════════════════════════════════════════════ */
+.progress-bar-wrap {
+  background: rgba(255,255,255,0.05);
+  border-radius: 100px;
+  height: 6px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+
+/* ═══ FOOTER / NAV BUTTONS ══════════════════════════════════════════════════ */
+.section-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.btn-nav {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.btn-nav:hover { background: var(--glass); border-color: var(--blue); }
+.btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+.progress-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ═══ MISC ══════════════════════════════════════════════════════════════════ */
+.divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.mt16 { margin-top: 16px; }
+.mb8  { margin-bottom: 8px; }
+.emoji { margin-right: 6px; }
+
+.step-list { list-style: none; padding: 0; counter-reset: steps; }
+.step-list li {
+  counter-increment: steps;
+  display: flex; gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+.step-list li::before {
+  content: counter(steps);
+  width: 24px; height: 24px;
+  background: var(--blue);
+  color: var(--navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--green);
+  color: var(--navy);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.3s;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* check/radio style */
+.option-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.option-label {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  color: #cbd5e1;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.option-label:hover { background: var(--glass); border-color: var(--blue); }
+.option-label input { accent-color: var(--blue); width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">Cambridge IGCSE • Computer Science 0478 • Year 10</div>
+    <h1>Data Representation<br>Activity Paper</h1>
+    <p class="hero-sub">Complete each section, type your answers directly in the boxes, then submit to your teacher via GitHub.</p>
+  </div>
+
+  <!-- STUDENT INFO -->
+  <div class="student-card">
+    <h2>// Student Details</h2>
+    <div class="student-grid">
+      <div class="field-group">
+        <label for="s-name">Full Name</label>
+        <input type="text" id="s-name" placeholder="Your full name">
+      </div>
+      <div class="field-group">
+        <label for="s-class">Class</label>
+        <input type="text" id="s-class" placeholder="e.g. 10B">
+      </div>
+      <div class="field-group">
+        <label for="s-date">Date</label>
+        <input type="date" id="s-date">
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:12.5%"></div>
+  </div>
+
+  <!-- NAV TABS -->
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="tab-btn active" onclick="goTo(0)">§1 Theory</button>
+    <button class="tab-btn" onclick="goTo(1)">§2 Sequences</button>
+    <button class="tab-btn" onclick="goTo(2)">§3 Conversions</button>
+    <button class="tab-btn" onclick="goTo(3)">§4 Hex Uses</button>
+    <button class="tab-btn" onclick="goTo(4)">§5 Arithmetic</button>
+    <button class="tab-btn" onclick="goTo(5)">§6 Overflow</button>
+    <button class="tab-btn" onclick="goTo(6)">§7 Shifts</button>
+    <button class="tab-btn" onclick="goTo(7)">§8 Revision</button>
+  </div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 1: NUMBER SYSTEMS THEORY
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section active" id="sec-0">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div>
+      <div class="section-title">Number Systems — Theory</div>
+      <div class="section-desc">Read the theory carefully before attempting the tasks</div>
+    </div>
+  </div>
+
+  <div class="theory-box">
+    <h3>📌 1.1 Denary (Base 10)</h3>
+    <p>Denary is the number system we use every day. It uses <strong>ten digits: 0–9</strong>. It is called Base 10 because each column is worth <strong>ten times</strong> the column to its right.</p>
+    <table class="data-table" style="margin-top:12px">
+      <tr><th>Ten-thousands</th><th>Thousands</th><th>Hundreds</th><th>Tens</th><th>Units</th></tr>
+      <tr><td>10 000</td><td>1 000</td><td>100</td><td>10</td><td>1</td></tr>
+      <tr><td>0</td><td>0</td><td class="given">3</td><td class="given">4</td><td class="given">7</td></tr>
+    </table>
+    <div class="highlight">Example: 347 = (3 × 100) + (4 × 10) + (7 × 1) = 300 + 40 + 7</div>
+  </div>
+
+  <div class="theory-box green">
+    <h3>📌 1.2 Binary (Base 2)</h3>
+    <p>Binary uses only <strong>two digits: 0 and 1</strong>, matching the two states of a transistor (off/on). Each binary digit is called a <strong>BIT</strong>. Eight bits = one <strong>BYTE</strong>.</p>
+    <table class="data-table" style="margin-top:12px">
+      <tr><th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th></tr>
+      <tr><td class="given">1</td><td>0</td><td class="given">1</td><td class="given">1</td><td>0</td><td class="given">1</td><td>0</td><td class="given">1</td></tr>
+    </table>
+    <div class="highlight" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.2);color:var(--green)">
+      10110101₂ = 128 + 32 + 16 + 4 + 1 = <strong>181₁₀</strong>
+    </div>
+  </div>
+
+  <div class="theory-box amber">
+    <h3>📌 1.3 Hexadecimal (Base 16)</h3>
+    <p>Hexadecimal uses <strong>sixteen digits: 0–9 and A–F</strong>. The letters A–F represent values 10–15. One hex digit = exactly <strong>4 binary bits (a nibble)</strong>.</p>
+    <table class="data-table" style="margin-top:12px">
+      <tr><th>Denary</th><th>Binary</th><th>Hex</th><th>Denary</th><th>Binary</th><th>Hex</th></tr>
+      <tr><td>0</td><td>0000</td><td>0</td><td>8</td><td>1000</td><td>8</td></tr>
+      <tr><td>1</td><td>0001</td><td>1</td><td>9</td><td>1001</td><td>9</td></tr>
+      <tr><td>2</td><td>0010</td><td>2</td><td>10</td><td>1010</td><td class="given">A</td></tr>
+      <tr><td>3</td><td>0011</td><td>3</td><td>11</td><td>1011</td><td class="given">B</td></tr>
+      <tr><td>4</td><td>0100</td><td>4</td><td>12</td><td>1100</td><td class="given">C</td></tr>
+      <tr><td>5</td><td>0101</td><td>5</td><td>13</td><td>1101</td><td class="given">D</td></tr>
+      <tr><td>6</td><td>0110</td><td>6</td><td>14</td><td>1110</td><td class="given">E</td></tr>
+      <tr><td>7</td><td>0111</td><td>7</td><td>15</td><td>1111</td><td class="given">F</td></tr>
+    </table>
+    <div class="highlight" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.2);color:var(--amber)">
+      Key Fact: 1010 1111₂ = AF₁₆ — each hex digit replaces exactly 4 bits!
+    </div>
+  </div>
+
+  <!-- Quick check Q1 -->
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Quick Check</div>
+    <h4>Check Your Understanding</h4>
+    <p>Answer these questions about the theory above before moving on.</p>
+    <label class="answer-label">1. How many digits does binary use? Name them.</label>
+    <textarea class="answer-field" id="q1_1" rows="2" placeholder="Type your answer here..."></textarea>
+    <label class="answer-label">2. What is a BYTE made of?</label>
+    <textarea class="answer-field" id="q1_2" rows="2" placeholder="Type your answer here..."></textarea>
+    <label class="answer-label">3. What hex digit represents the denary value 14?</label>
+    <textarea class="answer-field" id="q1_3" rows="2" placeholder="Type your answer here..."></textarea>
+    <label class="answer-label">4. How many binary bits does ONE hex digit represent?</label>
+    <textarea class="answer-field" id="q1_4" rows="2" placeholder="Type your answer here..."></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" disabled>← Previous</button>
+    <span class="progress-label">Section 1 of 8</span>
+    <button class="btn-nav" onclick="goTo(1)">Next: Sequences →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 2: COUNTING SEQUENCES
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-1">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div>
+      <div class="section-title">Counting Sequences</div>
+      <div class="section-desc">Write the next 10 numbers in each sequence</div>
+    </div>
+  </div>
+
+  <!-- LEVEL 1 -->
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Level 1 — Foundation</div>
+    <h4>Task 1a — Count in Denary (step +1)</h4>
+    <p>Continue the sequence — write the next 10 numbers.</p>
+    <div class="seq-container">
+      <div class="seq-row" id="seq-den1"></div>
+    </div>
+    <h4 class="mt16">Task 1b — Count in Binary (step +1)</h4>
+    <p>Continue in binary — remember to carry!</p>
+    <div class="seq-container">
+      <div class="seq-row" id="seq-bin1"></div>
+    </div>
+    <h4 class="mt16">Task 1c — Count in Hexadecimal (step +1)</h4>
+    <p>Continue in hex — what comes after 9?</p>
+    <div class="seq-container">
+      <div class="seq-row" id="seq-hex1"></div>
+    </div>
+  </div>
+
+  <!-- LEVEL 2 -->
+  <div class="task-block">
+    <div class="level-badge level-2">⭐⭐ Level 2 — Developing</div>
+    <h4>Task 2a — Skip Count Denary (+3): 1, 4, 7, 10 …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-den2"></div></div>
+    <h4 class="mt16">Task 2b — Skip Count Binary (+3): 1, 100, 111, 1010 …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-bin2"></div></div>
+    <h4 class="mt16">Task 2c — Skip Count Hex (+3): 1, 4, 7, A …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-hex2"></div></div>
+  </div>
+
+  <!-- LEVEL 3 -->
+  <div class="task-block">
+    <div class="level-badge level-3">⭐⭐⭐ Level 3 — Secure</div>
+    <h4>Task 3a — Skip Count Denary (+5): 2, 7, 12, 17 …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-den3"></div></div>
+    <h4 class="mt16">Task 3b — Skip Count Binary (+5): 0001, 0110, 1011, 10000 …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-bin3"></div></div>
+    <h4 class="mt16">Task 3c — Skip Count Hex (+5): 1, 6, B, 10 …</h4>
+    <div class="seq-container"><div class="seq-row" id="seq-hex3"></div></div>
+  </div>
+
+  <!-- LEVEL 4 -->
+  <div class="task-block">
+    <div class="level-badge level-4">⭐⭐⭐⭐ Level 4 — Extended Challenge</div>
+    <h4>Task 4 — Doubling Sequence: 3, 6, 12, 24, 48 …</h4>
+    <p>What is the rule? Fill in the next 10 denary values, then convert each to binary and hex.</p>
+    <label class="answer-label">Describe the rule:</label>
+    <textarea class="answer-field" id="seq-rule" rows="2" placeholder="Each number is..."></textarea>
+    <table class="conv-table">
+      <thead><tr><th>Term #</th><th>Denary</th><th>Binary</th><th>Hexadecimal</th></tr></thead>
+      <tbody id="seq-l4-body"></tbody>
+    </table>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(0)">← Theory</button>
+    <span class="progress-label">Section 2 of 8</span>
+    <button class="btn-nav" onclick="goTo(2)">Next: Conversions →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 3: CONVERSIONS
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-2">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div>
+      <div class="section-title">Converting Between Number Systems</div>
+      <div class="section-desc">Theory first, then differentiated tasks</div>
+    </div>
+  </div>
+
+  <div class="theory-box green">
+    <h3>Method: Denary → Binary (Repeated ÷2)</h3>
+    <ul>
+      <li>Divide the denary number by 2, record the remainder</li>
+      <li>Repeat with the quotient until you reach 0</li>
+      <li>Read the remainders <strong>BOTTOM to TOP</strong></li>
+    </ul>
+    <div class="highlight" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.2);color:var(--green)">
+      25÷2=12 r<b>1</b> | 12÷2=6 r<b>0</b> | 6÷2=3 r<b>0</b> | 3÷2=1 r<b>1</b> | 1÷2=0 r<b>1</b><br>
+      Read bottom→top: <b>11001</b> ∴ 25₁₀ = 11001₂
+    </div>
+  </div>
+
+  <div class="theory-box">
+    <h3>Method: Binary → Denary (Column Values)</h3>
+    <ul>
+      <li>Write out: 128, 64, 32, 16, 8, 4, 2, 1</li>
+      <li>Write binary digits below the headings</li>
+      <li>Add up all column values where there is a <strong>1</strong></li>
+    </ul>
+    <div class="highlight">10110100 → 128+32+16+4 = <b>180</b></div>
+  </div>
+
+  <div class="theory-box amber">
+    <h3>Method: Denary → Hex (Divide by 16)</h3>
+    <ul>
+      <li>Divide by 16, record the remainder (10→A, 11→B … 15→F)</li>
+      <li>Repeat until quotient = 0. Read remainders <strong>bottom to top</strong></li>
+    </ul>
+    <div class="highlight" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.2);color:var(--amber)">
+      254÷16=15 r<b>14(E)</b> | 15÷16=0 r<b>15(F)</b> → Read up: <b>FE</b> ∴ 254₁₀ = FE₁₆
+    </div>
+  </div>
+
+  <div class="theory-box purple">
+    <h3>Method: Hex → Binary (4 bits per digit)</h3>
+    <ul>
+      <li>Replace each hex digit with its 4-bit binary equivalent</li>
+      <li>A=1010, B=1011, C=1100, D=1101, E=1110, F=1111</li>
+    </ul>
+    <div class="highlight" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.2);color:var(--purple)">
+      3F₁₆ → 0011 1111₂
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- LEVEL 1 -->
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Level 1 — Foundation</div>
+    <h4>Task 1 — Denary to 8-bit Binary</h4>
+    <p>First row is done for you as an example.</p>
+    <table class="conv-table">
+      <thead><tr><th>Denary</th><th>8-bit Binary</th><th>Working (show ÷2 steps)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">5</td><td class="given-val" style="color:var(--amber)">0000 0101</td><td class="given-val" style="color:var(--slate);font-size:11px">5÷2=2r1, 2÷2=1r0, 1÷2=0r1 → 101</td></tr>
+        <tr><td class="given-val">12</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_12_bin" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_12_work" placeholder="working"></td></tr>
+        <tr><td class="given-val">25</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_25_bin" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_25_work" placeholder="working"></td></tr>
+        <tr><td class="given-val">50</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_50_bin" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_50_work" placeholder="working"></td></tr>
+        <tr><td class="given-val">100</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_100_bin" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c1_100_work" placeholder="working"></td></tr>
+      </tbody>
+    </table>
+    <h4>Task 2 — Binary to Denary</h4>
+    <table class="conv-table">
+      <thead><tr><th>Binary</th><th>Denary</th><th>Working (add column values)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">0000 0110</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_a" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_aw" placeholder="working"></td></tr>
+        <tr><td class="given-val">0001 0001</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_b" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_bw" placeholder="working"></td></tr>
+        <tr><td class="given-val">0010 1000</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_c" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_cw" placeholder="working"></td></tr>
+        <tr><td class="given-val">0100 0011</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_d" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_dw" placeholder="working"></td></tr>
+        <tr><td class="given-val">0111 1111</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_e" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c2_ew" placeholder="working"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LEVEL 2 -->
+  <div class="task-block">
+    <div class="level-badge level-2">⭐⭐ Level 2 — Developing</div>
+    <h4>Task 3 — Denary to Hexadecimal</h4>
+    <table class="conv-table">
+      <thead><tr><th>Denary</th><th>Hex</th><th>Working (÷16 steps)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">16</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_16" placeholder="hex"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_16w" placeholder="working"></td></tr>
+        <tr><td class="given-val">47</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_47" placeholder="hex"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_47w" placeholder="working"></td></tr>
+        <tr><td class="given-val">120</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_120" placeholder="hex"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_120w" placeholder="working"></td></tr>
+        <tr><td class="given-val">200</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_200" placeholder="hex"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_200w" placeholder="working"></td></tr>
+        <tr><td class="given-val">255</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_255" placeholder="hex"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c3_255w" placeholder="working"></td></tr>
+      </tbody>
+    </table>
+    <h4>Task 4 — Hex to Binary</h4>
+    <table class="conv-table">
+      <thead><tr><th>Hexadecimal</th><th>Binary (4 bits per digit)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">3A</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c4_3A" placeholder="binary"></td></tr>
+        <tr><td class="given-val">7F</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c4_7F" placeholder="binary"></td></tr>
+        <tr><td class="given-val">B2</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c4_B2" placeholder="binary"></td></tr>
+        <tr><td class="given-val">FF</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c4_FF" placeholder="binary"></td></tr>
+        <tr><td class="given-val">1C9</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c4_1C9" placeholder="binary"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LEVEL 3 -->
+  <div class="task-block">
+    <div class="level-badge level-3">⭐⭐⭐ Level 3 — Secure</div>
+    <h4>Task 5 — Multi-step: Fill in the full table</h4>
+    <table class="conv-table">
+      <thead><tr><th>Denary</th><th>Binary (8-bit)</th><th>Hexadecimal</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">175</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_175b" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_175h" placeholder="hex"></td></tr>
+        <tr><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_d1" placeholder="denary"></td><td class="given-val">1010 0111</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_h1" placeholder="hex"></td></tr>
+        <tr><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_d2" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_b2" placeholder="binary"></td><td class="given-val">5E</td></tr>
+        <tr><td class="given-val">239</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_239b" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_239h" placeholder="hex"></td></tr>
+        <tr><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_d3" placeholder="denary"></td><td class="given-val">1111 0000</td><td><input class="answer-field" style="min-height:36px;margin:0" id="c5_h3" placeholder="hex"></td></tr>
+      </tbody>
+    </table>
+    <h4>Task 6 — Error Checking</h4>
+    <p>A student made mistakes. Find the error and give the correct answer.</p>
+    <table class="conv-table">
+      <thead><tr><th>Claim</th><th>Correct? (Yes/No)</th><th>Correct Answer (if wrong)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">42₁₀ = 0010 1000₂</td><td><input class="answer-field" style="min-height:36px;margin:0" id="err1yn" placeholder="Yes / No"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="err1ans" placeholder="correct answer if wrong"></td></tr>
+        <tr><td class="given-val">B3₁₆ = 178₁₀</td><td><input class="answer-field" style="min-height:36px;margin:0" id="err2yn" placeholder="Yes / No"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="err2ans" placeholder="correct answer if wrong"></td></tr>
+        <tr><td class="given-val">157₁₀ = 9D₁₆</td><td><input class="answer-field" style="min-height:36px;margin:0" id="err3yn" placeholder="Yes / No"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="err3ans" placeholder="correct answer if wrong"></td></tr>
+        <tr><td class="given-val">1100 1010₂ = CB₁₆</td><td><input class="answer-field" style="min-height:36px;margin:0" id="err4yn" placeholder="Yes / No"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="err4ans" placeholder="correct answer if wrong"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- LEVEL 4 -->
+  <div class="task-block">
+    <div class="level-badge level-4">⭐⭐⭐⭐ Level 4 — Extended Challenge</div>
+    <h4>Task 7 — Web Colour Codes (RGB Hex)</h4>
+    <p>In web design colours are stored as hex codes like #FF8C00. Each pair of hex digits = Red, Green, Blue (0–255).</p>
+    <label class="answer-label">(a) Convert #3A9F2B — Red value (denary):</label>
+    <input class="answer-field" id="col_r" placeholder="Red denary value" style="min-height:36px">
+    <label class="answer-label">Green value (denary):</label>
+    <input class="answer-field" id="col_g" placeholder="Green denary value" style="min-height:36px">
+    <label class="answer-label">Blue value (denary):</label>
+    <input class="answer-field" id="col_b" placeholder="Blue denary value" style="min-height:36px">
+    <label class="answer-label">(b) R=100, G=149, B=237 → Hex colour code:</label>
+    <input class="answer-field" id="col_hex" placeholder="#RRGGBB" style="min-height:36px">
+    <label class="answer-label">(c) Convert 10111110 to hex and denary. What colour component could it represent?</label>
+    <textarea class="answer-field" id="col_c" rows="3" placeholder="Hex: ..., Denary: ..., It could represent..."></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(1)">← Sequences</button>
+    <span class="progress-label">Section 3 of 8</span>
+    <button class="btn-nav" onclick="goTo(3)">Next: Why Hex →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 4: WHY HEX
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-3">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div>
+      <div class="section-title">Why Hexadecimal is Used</div>
+      <div class="section-desc">Theory + real-world activity</div>
+    </div>
+  </div>
+
+  <div class="theory-box amber">
+    <h3>Why Computers Use Hex</h3>
+    <p>Binary is exact — computers run on it. But long binary strings are hard for humans to read, write, and remember. Hexadecimal solves this problem by being much more compact.</p>
+    <table class="data-table" style="margin-top:12px">
+      <tr><th>Format</th><th>Value</th><th>Length</th></tr>
+      <tr><td>Denary</td><td>255</td><td>3 characters</td></tr>
+      <tr><td>Binary</td><td>11111111</td><td>8 characters</td></tr>
+      <tr><td class="given">Hex</td><td class="given">FF</td><td class="given">2 characters ✓</td></tr>
+    </table>
+    <ul style="margin-top:12px">
+      <li><strong>Memory addresses</strong> — e.g. 0x00FF2A44</li>
+      <li><strong>Colour codes</strong> — e.g. #FF5733 in HTML/CSS</li>
+      <li><strong>MAC addresses</strong> — e.g. 00:1A:2B:3C:4D:5E</li>
+      <li><strong>IPv6 addresses</strong> — e.g. 2001:0db8:85a3::8a2e:0370:7334</li>
+      <li><strong>Error / debug messages</strong> in operating systems</li>
+    </ul>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-2">Activity A — Memory Address Analysis</div>
+    <h4>Convert these memory addresses</h4>
+    <table class="conv-table">
+      <thead><tr><th>Hex Address</th><th>Denary Value</th><th>Binary</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">0xFF</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_FF_d" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_FF_b" placeholder="binary"></td></tr>
+        <tr><td class="given-val">0x1A</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_1A_d" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_1A_b" placeholder="binary"></td></tr>
+        <tr><td class="given-val">0x100</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_100_d" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_100_b" placeholder="binary"></td></tr>
+        <tr><td class="given-val">0x2F3</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_2F3_d" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ma_2F3_b" placeholder="binary"></td></tr>
+      </tbody>
+    </table>
+    <label class="answer-label">Which address is largest and why is hex easier here than binary?</label>
+    <textarea class="answer-field" id="ma_explain" rows="3" placeholder="The largest address is... Hex is easier because..."></textarea>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-3">Activity B — CSS Colour Codes</div>
+    <h4>Decode these CSS hex colour codes into R, G, B values</h4>
+    <table class="conv-table">
+      <thead><tr><th>Hex Code</th><th>Red (Denary)</th><th>Green (Denary)</th><th>Blue (Denary)</th><th>Describe the colour</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val" style="color:#FF6B6B">#FF0000</td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_1r" placeholder="R"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_1g" placeholder="G"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_1b" placeholder="B"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_1c" placeholder="colour"></td></tr>
+        <tr><td class="given-val" style="color:#4ade80">#00FF00</td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_2r" placeholder="R"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_2g" placeholder="G"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_2b" placeholder="B"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_2c" placeholder="colour"></td></tr>
+        <tr><td class="given-val" style="color:#60a5fa">#0000FF</td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_3r" placeholder="R"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_3g" placeholder="G"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_3b" placeholder="B"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_3c" placeholder="colour"></td></tr>
+        <tr><td class="given-val">#FFFFFF</td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_4r" placeholder="R"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_4g" placeholder="G"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_4b" placeholder="B"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_4c" placeholder="colour"></td></tr>
+        <tr><td class="given-val">#808080</td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_5r" placeholder="R"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_5g" placeholder="G"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_5b" placeholder="B"></td>
+          <td><input class="answer-field" style="min-height:36px;margin:0" id="css_5c" placeholder="colour"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-4">Activity C — Discussion</div>
+    <h4>Answer in full sentences</h4>
+    <label class="answer-label">1. Why do computer scientists prefer hex over binary when writing programs?</label>
+    <textarea class="answer-field" id="disc1" rows="3"></textarea>
+    <label class="answer-label">2. If a computer stores data in 16-bit groups, how many hex digits are needed? Explain.</label>
+    <textarea class="answer-field" id="disc2" rows="3"></textarea>
+    <label class="answer-label">3. Give TWO real-life examples (not listed above) where hex is used and explain why.</label>
+    <textarea class="answer-field" id="disc3" rows="4"></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(2)">← Conversions</button>
+    <span class="progress-label">Section 4 of 8</span>
+    <button class="btn-nav" onclick="goTo(4)">Next: Arithmetic →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 5: BINARY ARITHMETIC & TWO'S COMPLEMENT
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-4">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div>
+      <div class="section-title">Binary Arithmetic & Negative Numbers</div>
+      <div class="section-desc">Binary addition and two's complement</div>
+    </div>
+  </div>
+
+  <div class="theory-box">
+    <h3>Binary Addition Rules</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <div class="highlight">0 + 0 = 0</div>
+      <div class="highlight">0 + 1 = 1</div>
+      <div class="highlight">1 + 0 = 1</div>
+      <div class="highlight">1 + 1 = 10 (write 0, carry 1)</div>
+      <div class="highlight" style="grid-column:span 2">1 + 1 + 1 = 11 (write 1, carry 1)</div>
+    </div>
+  </div>
+
+  <div class="theory-box rose">
+    <h3>Two's Complement — Representing Negative Numbers</h3>
+    <p>In 8-bit two's complement the MSB has value <strong>−128</strong> instead of +128.</p>
+    <table class="data-table" style="margin-top:10px">
+      <tr><th style="color:var(--rose)">−128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th></tr>
+      <tr><td class="given" style="color:var(--rose)">1</td><td class="given">1</td><td class="given">1</td><td class="given">1</td><td>0</td><td class="given">1</td><td class="given">1</td><td>0</td></tr>
+    </table>
+    <div class="highlight" style="background:rgba(251,113,133,0.1);border-color:rgba(251,113,133,0.2);color:var(--rose)">
+      11110110₂ in two's complement = −128+64+32+16+4+2 = <b>−10₁₀</b>
+    </div>
+    <p style="margin-top:12px"><strong>How to find two's complement of a negative number:</strong></p>
+    <ol class="step-list">
+      <li>Write the positive value in 8-bit binary</li>
+      <li>INVERT all bits (0→1, 1→0) — this gives the one's complement</li>
+      <li>ADD 1 to the result</li>
+    </ol>
+    <div class="highlight" style="background:rgba(251,113,133,0.1);border-color:rgba(251,113,133,0.2);color:var(--rose); margin-top:10px">
+      Find −45: +45 = 0010 1101 → Invert: 1101 0010 → +1: <b>1101 0011</b>
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Level 1 — Binary Addition (basic)</div>
+    <h4>Task 1 — Add these 8-bit binary numbers. Show carries.</h4>
+    <label class="answer-label">0000 0011 + 0000 0101 =</label>
+    <textarea class="answer-field" id="add1a" rows="3" placeholder="Show your carry working and result..."></textarea>
+    <label class="answer-label">0000 1000 + 0000 0111 =</label>
+    <textarea class="answer-field" id="add1b" rows="3" placeholder="Show your carry working and result..."></textarea>
+    <label class="answer-label">0001 0001 + 0001 0001 =</label>
+    <textarea class="answer-field" id="add1c" rows="3" placeholder="Show your carry working and result..."></textarea>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-2">⭐⭐ Level 2 — Binary Addition (with carry)</div>
+    <h4>Task 2 — Add these pairs (show carry row)</h4>
+    <label class="answer-label">0010 1101 + 0001 0110 =</label>
+    <textarea class="answer-field" id="add2a" rows="3" placeholder="Carries: ...\nResult:  ..."></textarea>
+    <label class="answer-label">0011 1111 + 0001 0001 =</label>
+    <textarea class="answer-field" id="add2b" rows="3" placeholder="Carries: ...\nResult:  ..."></textarea>
+    <label class="answer-label">0101 0101 + 0010 1010 =</label>
+    <textarea class="answer-field" id="add2c" rows="3" placeholder="Carries: ...\nResult:  ..."></textarea>
+    <label class="answer-label">0110 0111 + 0011 1100 =</label>
+    <textarea class="answer-field" id="add2d" rows="3" placeholder="Carries: ...\nResult:  ..."></textarea>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-3">⭐⭐⭐ Level 3 — Two's Complement</div>
+    <h4>Task 3 — Find the 8-bit two's complement of each value. Show all 3 steps.</h4>
+    <table class="conv-table">
+      <thead><tr><th>Value</th><th>Step 1: +ve binary</th><th>Step 2: Invert</th><th>Step 3: +1 (result)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">−6</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_6s1" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_6s2" placeholder="inverted"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_6s3" placeholder="result"></td></tr>
+        <tr><td class="given-val">−15</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_15s1"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_15s2"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_15s3"></td></tr>
+        <tr><td class="given-val">−50</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_50s1"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_50s2"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_50s3"></td></tr>
+        <tr><td class="given-val">−100</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_100s1"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_100s2"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_100s3"></td></tr>
+        <tr><td class="given-val">−127</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_127s1"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_127s2"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tc_127s3"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-4">⭐⭐⭐⭐ Level 4 — Reading Two's Complement Values</div>
+    <h4>Task 4 — Convert each 8-bit two's complement to denary. Remember MSB = −128.</h4>
+    <table class="conv-table">
+      <thead><tr><th>8-bit Two's Complement</th><th>Denary Value</th><th>Positive or Negative?</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">1000 0001</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_1" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_1s" placeholder="+/-"></td></tr>
+        <tr><td class="given-val">1111 1111</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_2" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_2s" placeholder="+/-"></td></tr>
+        <tr><td class="given-val">1001 0110</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_3" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_3s" placeholder="+/-"></td></tr>
+        <tr><td class="given-val">0111 1111</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_4" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_4s" placeholder="+/-"></td></tr>
+        <tr><td class="given-val">1100 0000</td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_5" placeholder="denary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="tcr_5s" placeholder="+/-"></td></tr>
+      </tbody>
+    </table>
+    <label class="answer-label">Hint: How can you tell if a two's complement number is negative just by looking at it?</label>
+    <textarea class="answer-field" id="tcr_hint" rows="2"></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(3)">← Why Hex</button>
+    <span class="progress-label">Section 5 of 8</span>
+    <button class="btn-nav" onclick="goTo(5)">Next: Overflow →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 6: OVERFLOW ERRORS
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-5">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div>
+      <div class="section-title">Overflow Errors</div>
+      <div class="section-desc">When results are too large for the available bits</div>
+    </div>
+  </div>
+
+  <div class="theory-box rose">
+    <h3>What is an Overflow Error?</h3>
+    <p>An overflow error occurs when the result of a calculation is <strong>too large (or too small)</strong> to be stored in the available number of bits.</p>
+    <p><strong>Unsigned 8-bit:</strong> max value = 255 (1111 1111). Adding 1 produces 256 — needs a 9th bit that is lost.</p>
+    <div class="highlight" style="background:rgba(251,113,133,0.1);border-color:rgba(251,113,133,0.2);color:var(--rose)">
+      1111 1111 + 0000 0001 = [<b>1</b>] 0000 0000 ← carry out of MSB LOST! Result = 0 ✗
+    </div>
+    <p style="margin-top:12px"><strong>Signed (two's complement) 8-bit:</strong> range is −128 to +127.</p>
+    <div class="highlight" style="background:rgba(251,113,133,0.1);border-color:rgba(251,113,133,0.2);color:var(--rose)">
+      0111 1111 (+127) + 0000 0001 (+1) = 1000 0000 = −128 ✗ (overflow!)<br>
+      1000 0000 (−128) + 1111 1111 (−1) = [1]0111 1111 = +127 ✗ (overflow!)
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Level 1 — Identify Overflow</div>
+    <h4>Task 1 — Carry out each addition. Did overflow occur?</h4>
+    <table class="conv-table">
+      <thead><tr><th>Calculation</th><th>8-bit Result</th><th>Overflow? (Yes/No)</th><th>Carry bit lost?</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">200 + 60</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov1_r" placeholder="result"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov1_ov" placeholder="Yes/No"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov1_c" placeholder="Yes/No"></td></tr>
+        <tr><td class="given-val">100 + 100</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov2_r"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov2_ov"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov2_c"></td></tr>
+        <tr><td class="given-val">127 + 1</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov3_r"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov3_ov"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov3_c"></td></tr>
+        <tr><td class="given-val">50 + 200</td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov4_r"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov4_ov"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="ov4_c"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-2">⭐⭐ Level 2 — Overflow Analysis</div>
+    <h4>Task 2 — Answer in full sentences</h4>
+    <label class="answer-label">1. An 8-bit register holds 1111 0000. The program adds 0001 0000. Show the result and state if overflow occurred.</label>
+    <textarea class="answer-field" id="ov_q1" rows="4" placeholder="Binary addition: ...\nResult: ...\nOverflow: Yes/No because..."></textarea>
+    <label class="answer-label">2. Explain why overflow is a problem in computer programs. What might happen in a real-world system?</label>
+    <textarea class="answer-field" id="ov_q2" rows="4" placeholder="Overflow is a problem because..."></textarea>
+    <label class="answer-label">3. How many bits would you need to store 200 + 200 without overflow? Justify your answer.</label>
+    <textarea class="answer-field" id="ov_q3" rows="3" placeholder="You would need ... bits because 200+200=400 which is..."></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(4)">← Arithmetic</button>
+    <span class="progress-label">Section 6 of 8</span>
+    <button class="btn-nav" onclick="goTo(6)">Next: Shifts →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 7: BINARY SHIFTS
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-6">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div>
+      <div class="section-title">Logical Binary Shifts</div>
+      <div class="section-desc">Left and right shifts — multiply and divide by powers of 2</div>
+    </div>
+  </div>
+
+  <div class="theory-box green">
+    <h3>Left Shift (&lt;&lt;)</h3>
+    <p>Shifting LEFT by n places <strong>multiplies</strong> the value by 2ⁿ (if no significant bits are lost). Bits shifted beyond the MSB are <strong>lost</strong>. 0s fill the vacated right positions.</p>
+    <div class="highlight" style="background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.2);color:var(--green)">
+      0000 1010 (10) &lt;&lt; 2 → 0010 1000 (40) ✓ &nbsp; 10 × 4 = 40
+    </div>
+  </div>
+
+  <div class="theory-box">
+    <h3>Right Shift (&gt;&gt;)</h3>
+    <p>Shifting RIGHT by n places <strong>divides</strong> the value by 2ⁿ (integer division). Bits shifted beyond the LSB are <strong>lost</strong>. 0s fill the vacated left positions.</p>
+    <div class="highlight">
+      0010 1000 (40) &gt;&gt; 2 → 0000 1010 (10) ✓ &nbsp; 40 ÷ 4 = 10
+    </div>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-1">⭐ Level 1 — Left Shifts</div>
+    <h4>Task 1 — Perform each left shift and give the new denary value</h4>
+    <table class="conv-table">
+      <thead><tr><th>Original Binary</th><th>Shift</th><th>Result (binary)</th><th>New Denary</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">0000 0001</td><td class="given-val">&lt;&lt; 1</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_1b" placeholder="binary"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_1d" placeholder="denary"></td></tr>
+        <tr><td class="given-val">0000 0011</td><td class="given-val">&lt;&lt; 2</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_2b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_2d"></td></tr>
+        <tr><td class="given-val">0001 0100</td><td class="given-val">&lt;&lt; 1</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_3b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_3d"></td></tr>
+        <tr><td class="given-val">0000 1010</td><td class="given-val">&lt;&lt; 3</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_4b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh1_4d"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-2">⭐⭐ Level 2 — Right Shifts</div>
+    <h4>Task 2 — Perform each right shift</h4>
+    <table class="conv-table">
+      <thead><tr><th>Original Binary</th><th>Shift</th><th>Result (binary)</th><th>New Denary</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">1000 0000</td><td class="given-val">&gt;&gt; 1</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_1b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_1d"></td></tr>
+        <tr><td class="given-val">0100 1100</td><td class="given-val">&gt;&gt; 2</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_2b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_2d"></td></tr>
+        <tr><td class="given-val">1111 1110</td><td class="given-val">&gt;&gt; 3</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_3b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_3d"></td></tr>
+        <tr><td class="given-val">0010 0000</td><td class="given-val">&gt;&gt; 4</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_4b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh2_4d"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-3">⭐⭐⭐ Level 3 — Overflow in Shifts</div>
+    <label class="answer-label">1. Shift 01101000 LEFT by 2. Show step-by-step and identify any overflow.</label>
+    <textarea class="answer-field" id="sh3_1" rows="4" placeholder="Step 1: ...\nStep 2: ...\nResult: ...\nOverflow: Yes/No because..."></textarea>
+    <label class="answer-label">2. Explain why 0000 1111 shifted LEFT by 5 causes information loss. What value is stored?</label>
+    <textarea class="answer-field" id="sh3_2" rows="3"></textarea>
+  </div>
+
+  <div class="task-block">
+    <div class="level-badge level-4">⭐⭐⭐⭐ Level 4 — Shifts as ×/÷</div>
+    <h4>Task 4 — Use binary shifts to calculate. Show original binary, shifted binary, result.</h4>
+    <table class="conv-table">
+      <thead><tr><th>Calculation</th><th>Original Binary</th><th>After Shift</th><th>Denary Answer</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">13 × 4</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_1a"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_1b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_1c"></td></tr>
+        <tr><td class="given-val">48 ÷ 8</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_2a"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_2b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_2c"></td></tr>
+        <tr><td class="given-val">7 × 8</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_3a"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_3b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_3c"></td></tr>
+        <tr><td class="given-val">96 ÷ 4</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_4a"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_4b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sh4_4c"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(5)">← Overflow</button>
+    <span class="progress-label">Section 7 of 8</span>
+    <button class="btn-nav" onclick="goTo(7)">Next: Revision →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SECTION 8: REVISION & CHECK QUESTIONS
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-7">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div>
+      <div class="section-title">Revision &amp; Check Questions</div>
+      <div class="section-desc">Test your understanding of all topics</div>
+    </div>
+  </div>
+
+  <!-- PART A -->
+  <div class="task-block">
+    <div class="level-badge level-1">Part A — Key Vocabulary</div>
+    <h4>Match each term to its definition</h4>
+    <table class="conv-table">
+      <thead><tr><th>Term</th><th>Your definition (in your own words)</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">Bit</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_bit"></td></tr>
+        <tr><td class="given-val">Byte</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_byte"></td></tr>
+        <tr><td class="given-val">Overflow</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_overflow"></td></tr>
+        <tr><td class="given-val">Two's Complement</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_tc"></td></tr>
+        <tr><td class="given-val">Nibble</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_nibble"></td></tr>
+        <tr><td class="given-val">MSB</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_msb"></td></tr>
+        <tr><td class="given-val">LSB</td><td><input class="answer-field" style="min-height:36px;margin:0" id="voc_lsb"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PART B -->
+  <div class="task-block">
+    <div class="level-badge level-2">Part B — Short Answer Questions</div>
+    <label class="answer-label">1. Convert 10110011₂ to denary. Show working.</label>
+    <textarea class="answer-field" id="rev_b1" rows="3"></textarea>
+    <label class="answer-label">2. Convert 217₁₀ to binary using repeated division. Show ALL steps.</label>
+    <textarea class="answer-field" id="rev_b2" rows="4"></textarea>
+    <label class="answer-label">3. Convert D8₁₆ to binary and then to denary.</label>
+    <textarea class="answer-field" id="rev_b3" rows="3"></textarea>
+    <label class="answer-label">4. Find the two's complement of −37 in 8 bits. Show all 3 steps.</label>
+    <textarea class="answer-field" id="rev_b4" rows="4"></textarea>
+    <label class="answer-label">5. Add: 01011011 + 00110110. Has overflow occurred? Explain.</label>
+    <textarea class="answer-field" id="rev_b5" rows="4"></textarea>
+    <label class="answer-label">6. 00010011 is shifted left by 3. What is the new binary and denary value?</label>
+    <textarea class="answer-field" id="rev_b6" rows="3"></textarea>
+    <label class="answer-label">7. Give TWO reasons why hex is preferred over binary for memory addresses.</label>
+    <textarea class="answer-field" id="rev_b7" rows="3"></textarea>
+    <label class="answer-label">8. State the range of values in an 8-bit two's complement number.</label>
+    <textarea class="answer-field" id="rev_b8" rows="2"></textarea>
+  </div>
+
+  <!-- PART C -->
+  <div class="task-block">
+    <div class="level-badge level-3">Part C — Structured Questions</div>
+    <h4>Question 1 — Number Systems [8 marks]</h4>
+    <p>(a) Complete the table:</p>
+    <table class="conv-table">
+      <thead><tr><th>Denary</th><th>Binary (8-bit)</th><th>Hexadecimal</th></tr></thead>
+      <tbody>
+        <tr><td class="given-val">90</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_90b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_90h"></td></tr>
+        <tr><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_d1"></td><td class="given-val">0101 0111</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_h1"></td></tr>
+        <tr><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_d2"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_b2"></td><td class="given-val">4B</td></tr>
+        <tr><td class="given-val">200</td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_200b"></td><td><input class="answer-field" style="min-height:36px;margin:0" id="sc_200h"></td></tr>
+      </tbody>
+    </table>
+    <label class="answer-label">(b) Explain why the number system used inside a CPU is binary and not denary.</label>
+    <textarea class="answer-field" id="sc_q1b" rows="4"></textarea>
+
+    <h4 style="margin-top:20px">Question 2 — Two's Complement &amp; Overflow [6 marks]</h4>
+    <label class="answer-label">(a) Find the two's complement of −99 in 8 bits. Show all steps. [3]</label>
+    <textarea class="answer-field" id="sc_q2a" rows="4"></textarea>
+    <label class="answer-label">(b) −100 is stored. The program adds −50. Show the binary addition and explain if overflow occurred. [3]</label>
+    <textarea class="answer-field" id="sc_q2b" rows="4"></textarea>
+
+    <h4 style="margin-top:20px">Question 3 — Binary Shifts [5 marks]</h4>
+    <label class="answer-label">(a) 0110 1100 shifted RIGHT by 3. New binary, denary, and any information lost? [3]</label>
+    <textarea class="answer-field" id="sc_q3a" rows="4"></textarea>
+    <label class="answer-label">(b) A programmer wants to multiply by 16 using shifts. How many left shifts? Explain. [2]</label>
+    <textarea class="answer-field" id="sc_q3b" rows="3"></textarea>
+  </div>
+
+  <!-- PART D -->
+  <div class="task-block">
+    <div class="level-badge level-4">Part D — Exam-Style Quick Check</div>
+    <label class="answer-label">1. State the number of bits in one byte. [1]</label>
+    <textarea class="answer-field" id="ex_1" rows="2"></textarea>
+    <label class="answer-label">2. Convert 0xAB to denary. [2]</label>
+    <textarea class="answer-field" id="ex_2" rows="3"></textarea>
+    <label class="answer-label">3. Write the 8-bit two's complement value for −1. [1]</label>
+    <textarea class="answer-field" id="ex_3" rows="2"></textarea>
+    <label class="answer-label">4. An 8-bit register stores 1111 1111. It is incremented by 1. What is stored and what problem occurs? [2]</label>
+    <textarea class="answer-field" id="ex_4" rows="3"></textarea>
+    <label class="answer-label">5. What does a logical right shift by 1 do to a binary value? Give an example. [2]</label>
+    <textarea class="answer-field" id="ex_5" rows="3"></textarea>
+    <label class="answer-label">6. A memory address is shown as 0x3F2A. Give ONE reason why hex is used instead of binary. [1]</label>
+    <textarea class="answer-field" id="ex_6" rows="2"></textarea>
+  </div>
+
+  <div class="section-nav">
+    <button class="btn-nav" onclick="goTo(6)">← Shifts</button>
+    <span class="progress-label">Section 8 of 8</span>
+    <button class="btn-nav" onclick="document.getElementById('submit-area').scrollIntoView({behavior:'smooth'})">Submit Answers ↓</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+  SUBMIT AREA
+══════════════════════════════════════════════════════════════════════════ -->
+<div class="submit-section" id="submit-area">
+  <h2>📤 Submit Your Answers</h2>
+  <p>Your answers will be submitted as a GitHub Issue. Your teacher will receive them automatically.<br>You need a GitHub account (or use the class shared login).</p>
+  <button class="btn-submit" onclick="submitToGitHub()">
+    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.82-.26.82-.58v-2.03c-3.34.72-4.04-1.6-4.04-1.6-.54-1.38-1.33-1.75-1.33-1.75-1.08-.74.08-.73.08-.73 1.2.08 1.83 1.23 1.83 1.23 1.06 1.82 2.8 1.29 3.48.99.1-.77.41-1.3.75-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+    Submit to GitHub Issues
+  </button>
+  <button class="btn-submit secondary" onclick="downloadAnswers()">
+    ⬇ Download as Text File
+  </button>
+  <p style="font-size:12px;color:var(--slate);margin-top:16px">Clicking "Submit to GitHub Issues" will open GitHub with your answers pre-filled. Click <strong>Submit new issue</strong> to send.</p>
+</div>
+
+</div><!-- /container -->
+
+<div class="toast" id="toast">✓ Saved locally</div>
+
+<script>
+// ═══ SECTION NAVIGATION ══════════════════════════════════════════════════════
+let currentSection = 0;
+const totalSections = 8;
+
+function goTo(n) {
+  document.querySelectorAll('.section').forEach((s,i) => {
+    s.classList.toggle('active', i === n);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === n);
+  });
+  currentSection = n;
+  document.getElementById('progress-fill').style.width = `${((n+1)/totalSections)*100}%`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  saveAll();
+}
+
+// ═══ BUILD SEQUENCE ROWS ═════════════════════════════════════════════════════
+function buildSeq(containerId, given, count, prefix) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  given.forEach(v => {
+    const d = document.createElement('div');
+    d.className = 'seq-cell given';
+    d.textContent = v;
+    c.appendChild(d);
+  });
+  for (let i = 0; i < count; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'seq-cell';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.id = `${prefix}_${i}`;
+    inp.placeholder = '?';
+    inp.addEventListener('input', saveAll);
+    wrap.appendChild(inp);
+    c.appendChild(wrap);
+  }
+}
+
+function buildL4Table() {
+  const tb = document.getElementById('seq-l4-body');
+  if (!tb) return;
+  for (let i = 1; i <= 10; i++) {
+    tb.innerHTML += `<tr>
+      <td class="given-val">${i+5}</td>
+      <td><input class="answer-field" style="min-height:36px;margin:0" id="l4_den_${i}" placeholder="denary"></td>
+      <td><input class="answer-field" style="min-height:36px;margin:0" id="l4_bin_${i}" placeholder="binary"></td>
+      <td><input class="answer-field" style="min-height:36px;margin:0" id="l4_hex_${i}" placeholder="hex"></td>
+    </tr>`;
+  }
+}
+
+// initialise
+buildSeq('seq-den1', ['0','1','2','3'], 10, 'sd1');
+buildSeq('seq-bin1', ['0000','0001','0010','0011'], 10, 'sb1');
+buildSeq('seq-hex1', ['0','1','2','3'], 10, 'sh1');
+buildSeq('seq-den2', ['1','4','7','10'], 10, 'sd2');
+buildSeq('seq-bin2', ['1','100','111','1010'], 10, 'sb2');
+buildSeq('seq-hex2', ['1','4','7','A'], 10, 'sh2');
+buildSeq('seq-den3', ['2','7','12','17'], 10, 'sd3');
+buildSeq('seq-bin3', ['0001','0110','1011','10000'], 10, 'sb3');
+buildSeq('seq-hex3', ['1','6','B','10'], 10, 'sh3');
+buildL4Table();
+
+// ═══ AUTO-SAVE TO localStorage ═══════════════════════════════════════════════
+function getAllAnswers() {
+  const data = {};
+  document.querySelectorAll('input[type=text],input[type=date],textarea').forEach(el => {
+    if (el.id) data[el.id] = el.value;
+  });
+  return data;
+}
+
+function saveAll() {
+  localStorage.setItem('cs0478_answers', JSON.stringify(getAllAnswers()));
+}
+
+function loadSaved() {
+  const raw = localStorage.getItem('cs0478_answers');
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+  } catch(e) {}
+}
+
+document.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', saveAll));
+
+// set today's date
+const dateEl = document.getElementById('s-date');
+if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
+
+loadSaved();
+
+// ═══ SUBMIT TO GITHUB ════════════════════════════════════════════════════════
+function buildIssueBody() {
+  const data = getAllAnswers();
+  const name  = data['s-name']  || '(not given)';
+  const cls   = data['s-class'] || '(not given)';
+  const date  = data['s-date']  || '(not given)';
+
+  let body = `## Student Submission\n`;
+  body += `**Name:** ${name}  \n**Class:** ${cls}  \n**Date:** ${date}\n\n---\n\n`;
+
+  const sections = [
+    { title: 'Section 1 — Theory Check', ids: ['q1_1','q1_2','q1_3','q1_4'],
+      labels: ['Q1: Binary digits','Q2: What is a byte','Q3: Hex digit for 14','Q4: Bits per hex digit'] },
+    { title: 'Section 2 — Sequences', ids: [], dynamic: true, prefix: 'seq' },
+    { title: 'Section 3 — Conversions', ids: [
+        'c1_12_bin','c1_12_work','c1_25_bin','c1_25_work','c1_50_bin','c1_50_work','c1_100_bin','c1_100_work',
+        'c2_a','c2_aw','c2_b','c2_bw','c2_c','c2_cw','c2_d','c2_dw','c2_e','c2_ew',
+        'c3_16','c3_16w','c3_47','c3_47w','c3_120','c3_120w','c3_200','c3_200w','c3_255','c3_255w',
+        'c4_3A','c4_7F','c4_B2','c4_FF','c4_1C9',
+        'c5_175b','c5_175h','c5_d1','c5_h1','c5_d2','c5_b2','c5_239b','c5_239h','c5_d3','c5_h3',
+        'err1yn','err1ans','err2yn','err2ans','err3yn','err3ans','err4yn','err4ans',
+        'col_r','col_g','col_b','col_hex','col_c'],
+      labels: [] },
+    { title: 'Section 4 — Why Hex', ids: [
+        'ma_FF_d','ma_FF_b','ma_1A_d','ma_1A_b','ma_100_d','ma_100_b','ma_2F3_d','ma_2F3_b','ma_explain',
+        'css_1r','css_1g','css_1b','css_1c','css_2r','css_2g','css_2b','css_2c',
+        'css_3r','css_3g','css_3b','css_3c','css_4r','css_4g','css_4b','css_4c',
+        'css_5r','css_5g','css_5b','css_5c','disc1','disc2','disc3'], labels: [] },
+    { title: 'Section 5 — Arithmetic & Two\'s Complement', ids: [
+        'add1a','add1b','add1c','add2a','add2b','add2c','add2d',
+        'tc_6s1','tc_6s2','tc_6s3','tc_15s1','tc_15s2','tc_15s3',
+        'tc_50s1','tc_50s2','tc_50s3','tc_100s1','tc_100s2','tc_100s3',
+        'tc_127s1','tc_127s2','tc_127s3',
+        'tcr_1','tcr_1s','tcr_2','tcr_2s','tcr_3','tcr_3s','tcr_4','tcr_4s','tcr_5','tcr_5s','tcr_hint'], labels: [] },
+    { title: 'Section 6 — Overflow', ids: [
+        'ov1_r','ov1_ov','ov1_c','ov2_r','ov2_ov','ov2_c',
+        'ov3_r','ov3_ov','ov3_c','ov4_r','ov4_ov','ov4_c',
+        'ov_q1','ov_q2','ov_q3'], labels: [] },
+    { title: 'Section 7 — Binary Shifts', ids: [
+        'sh1_1b','sh1_1d','sh1_2b','sh1_2d','sh1_3b','sh1_3d','sh1_4b','sh1_4d',
+        'sh2_1b','sh2_1d','sh2_2b','sh2_2d','sh2_3b','sh2_3d','sh2_4b','sh2_4d',
+        'sh3_1','sh3_2',
+        'sh4_1a','sh4_1b','sh4_1c','sh4_2a','sh4_2b','sh4_2c',
+        'sh4_3a','sh4_3b','sh4_3c','sh4_4a','sh4_4b','sh4_4c'], labels: [] },
+    { title: 'Section 8 — Revision', ids: [
+        'voc_bit','voc_byte','voc_overflow','voc_tc','voc_nibble','voc_msb','voc_lsb',
+        'rev_b1','rev_b2','rev_b3','rev_b4','rev_b5','rev_b6','rev_b7','rev_b8',
+        'sc_90b','sc_90h','sc_d1','sc_h1','sc_d2','sc_b2','sc_200b','sc_200h',
+        'sc_q1b','sc_q2a','sc_q2b','sc_q3a','sc_q3b',
+        'ex_1','ex_2','ex_3','ex_4','ex_5','ex_6'], labels: [] },
+  ];
+
+  sections.forEach(sec => {
+    body += `### ${sec.title}\n\n`;
+    if (sec.dynamic) {
+      // sequences
+      const seqIds = Object.keys(data).filter(k => /^s[dh][123]_/.test(k) || /^sb[123]_/.test(k) || /^l4_/.test(k) || k === 'seq-rule');
+      seqIds.sort();
+      seqIds.forEach(id => {
+        if (data[id]) body += `**${id}:** ${data[id]}\n`;
+      });
+    } else {
+      sec.ids.forEach((id, i) => {
+        const lbl = sec.labels[i] || id;
+        const val = data[id] || '_(blank)_';
+        body += `**${lbl}:** ${val}\n\n`;
+      });
+    }
+    body += '\n---\n\n';
+  });
+
+  return body;
+}
+
+function submitToGitHub() {
+  const data = getAllAnswers();
+  const name = data['s-name'] || 'Student';
+  const cls  = data['s-class'] || '';
+  const title = encodeURIComponent(`[Submission] ${name} ${cls} — Data Representation`);
+  const body  = encodeURIComponent(buildIssueBody());
+
+  // ── CHANGE THIS URL to your actual GitHub repo ──
+  const repoUrl = 'https://github.com/cistashkent/cs0478-data-representation/issues/new';
+  const url = `${repoUrl}?title=${title}&body=${body}&labels=submission`;
+
+  window.open(url, '_blank');
+}
+
+function downloadAnswers() {
+  const data = getAllAnswers();
+  const name = data['s-name'] || 'Student';
+  let text = `IGCSE CS 0478 — Data Representation\nStudent: ${name}\nClass: ${data['s-class']||''}\nDate: ${data['s-date']||''}\n\n`;
+  text += '='.repeat(60) + '\n\n';
+  Object.entries(data).forEach(([k,v]) => {
+    if (v && k !== 's-name' && k !== 's-class' && k !== 's-date') {
+      text += `[${k}]\n${v}\n\n`;
+    }
+  });
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${name.replace(/\s+/g,'_')}_CS0478_DataRepresentation.txt`;
+  a.click();
+}
+
+// ═══ TOAST ═══════════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// auto-save toast every 30s
+setInterval(() => { saveAll(); showToast('✓ Progress saved'); }, 30000);
+</script>
+</body>
+</html>
